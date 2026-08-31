@@ -1,0 +1,1 @@
+{"spec_version": 2, "upstream_default_branch": "main", "dropped_targets": ["wh_posix_server_file: requires --file flag on wh_posix_server.c added in mayhem-old but absent from upstream main; code path covered by wh_posix_server (network) and fuzz_wh_* harnesses"]}

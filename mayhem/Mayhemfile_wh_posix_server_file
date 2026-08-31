@@ -1,0 +1,6 @@
+project: savantenvs/wolfHSM
+target: wh_posix_server_file
+
+cmds:
+  - cmd: /mayhem/wh_posix_server --nvminit @@
+    max_length: 1048576

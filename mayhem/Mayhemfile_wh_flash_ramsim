@@ -1,0 +1,7 @@
+project: savantenvs/wolfHSM
+target: wh_flash_ramsim
+
+cmds:
+  - cmd: /mayhem/wh_flash_ramsim
+    libfuzzer: true
+    max_length: 1048576

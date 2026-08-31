@@ -1,0 +1,11 @@
+project: savantenvs/wolfHSM
+target: wh_crypto
+
+testsuite:
+  - https://$MAYHEM_DOMAIN/$MAYHEM_PROJECT/$MAYHEM_TARGET/testsuite.tar
+  - file://mayhem/wh_crypto/testsuite
+
+cmds:
+  - cmd: /mayhem/wh_crypto
+    libfuzzer: true
+    max_length: 1048576

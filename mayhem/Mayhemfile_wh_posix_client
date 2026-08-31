@@ -1,0 +1,13 @@
+project: savantenvs/wolfHSM
+target: wh_posix_client
+
+testsuite:
+  - https://$MAYHEM_DOMAIN/$MAYHEM_PROJECT/$MAYHEM_TARGET/testsuite.tar
+  - file://mayhem/wh_posix_client/testsuite
+
+cmds:
+  - cmd: /mayhem/wh_posix_client
+    network:
+      url: 'tcp://127.0.0.1:23456'
+      timeout: 2
+      client: true

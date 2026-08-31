@@ -1,0 +1,7 @@
+project: savantenvs/wolfHSM
+target: wh_nvmflash
+
+cmds:
+  - cmd: /mayhem/wh_nvmflash
+    libfuzzer: true
+    max_length: 1048576

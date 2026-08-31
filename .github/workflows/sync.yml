@@ -1,0 +1,68 @@
+name: Sync upstream + fuzz on movement
+
+on:
+  schedule:
+    - cron: '6 11 * * 6'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      UPSTREAM: https://github.com/wolfSSL/wolfHSM.git
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch upstream
+        run: git fetch "$UPSTREAM" main
+
+      - name: Check for upstream movement
+        id: movement
+        run: |
+          LOCAL=$(git rev-parse origin/main)
+          UPSTREAM_SHA=$(git rev-parse FETCH_HEAD)
+          echo "local=$LOCAL"    >> "$GITHUB_OUTPUT"
+          echo "upstream=$UPSTREAM_SHA" >> "$GITHUB_OUTPUT"
+          if [ "$LOCAL" = "$UPSTREAM_SHA" ]; then
+            echo "moved=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "moved=true"  >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Mirror upstream → main
+        if: steps.movement.outputs.moved == 'true'
+        run: git push origin "FETCH_HEAD:refs/heads/main"
+
+      - name: Rebase mayhem onto new main
+        if: steps.movement.outputs.moved == 'true'
+        run: |
+          git checkout mayhem
+          git rebase origin/main
+          git push --force-with-lease origin mayhem
+
+      - name: Verify build still succeeds
+        if: steps.movement.outputs.moved == 'true'
+        run: |
+          docker build -f mayhem/Dockerfile \
+            --build-arg COMMIT=$(git rev-parse HEAD) \
+            --build-arg REPO_URL=${{ github.server_url }}/${{ github.repository }} \
+            -t wolfhsm-sync-verify:ci .
+
+  fuzz:
+    needs: sync
+    if: always()
+    uses: ./.github/workflows/mayhem.yml
+    with:
+      ref: ''
+      duration: '1200'
+    secrets: inherit
